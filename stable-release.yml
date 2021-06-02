@@ -1,0 +1,72 @@
+# FAS-Bus application main docker compose file
+# Run the install script to set password, change variables
+
+
+version: "3.9"
+services:
+    #
+    # MAIN SERVICES
+    #
+    
+    # Database module
+    dbcore:
+        image: fdms3741/fasbus-database
+        volumes:
+            - database_data:/var/lib/postgresql/data 
+        environment: 
+            POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+        secrets:
+            - configurations
+    
+    # Cache module
+    cache:
+        image: redis
+        resources:
+            limits:
+                memory: 1G
+
+    # Visualization module
+    vizualization:
+        image: fdms3741/fasbus-visualization
+        ports:
+            - "${API_PORT}:80"
+
+    # Insertion module
+    insertion:
+        image: fdms3741/fasbus-rio-insertion
+        volumes: 
+            - collected_data:/collect_bus_old
+
+        secrets:
+            - configurations
+                
+    # Correction module
+    correction:
+        image: fdms3741/fasbus-corretion
+        
+
+    # #
+    # # Other utilities
+    # # 
+
+    # # Database administration platform
+    # adminer:
+    #     image: adminer
+    #     ports:
+    #         - '8088:8080'
+
+    # # Advanced data visualization platform
+    # grafana:
+    #     image: grafana/grafana
+    #     ports:
+    #         - '3000:3000'
+
+
+volumes:
+    database_data:
+    collected_data:
+    
+
+secrets:
+    configurations:
+        file: main.conf

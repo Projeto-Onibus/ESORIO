@@ -1,6 +1,6 @@
-# FAS-Bus: Fleet Analysis Sistem
+# ESO-Rio: Vizualização estatística dos ônibus do Rio de Janeiro
 
-The FAS-Bus application is an system that collect, store, correct and display statistical data related to the city of Rio de Janeiro's bus fleet. It's is an example of a *FAS* (*Fleet Analysis System*) implementation. *FAS* stores, correct and exibit statistical data of an IoT-Integrated fleet with constant GPS monitoring. It's main objective is to correct the IoT generated data using GPU acceletation and distributed processing in order to provide better fleet analysis.
+Este repositório é a base de instalação do sistema que permite visualizar os dados estatísticos dos ônibus da cidade do Rio de Janeiro. Aqui encontra-se todos os arquivos de configuração que são utilizados nos múltiplos contâiners que são executados.
 
 ## Base do sistema
 
