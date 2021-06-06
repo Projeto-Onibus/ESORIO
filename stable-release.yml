@@ -52,8 +52,7 @@ services:
                 
     # Correction module
     correction:
-        build: ./Bus-trajectory-correction
-
+        image: fdms3741/fasbus-correction
 
 volumes:
     database_data:

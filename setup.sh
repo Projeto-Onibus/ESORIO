@@ -204,6 +204,6 @@ chmod 600 main.conf
 info "Files were set to read/write by root only. In those files is saved the database password. Keep those files secure."
 
 # Changing the desired version name to the main compose file
-info "Changing the $1 file ($COMPOSE_FILE) name to docker_compose.yml"
-cp $COMPOSE_FILE docker_compose.yml
+info "Changing the $1 file ($COMPOSE_FILE) name to docker-compose.yml"
+cp $COMPOSE_FILE docker-compose.yml
 info "The system is ready. Start it as you would do for normal compose daemon deployments: docker-compose up -d"
