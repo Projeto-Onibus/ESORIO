@@ -145,6 +145,11 @@ done
 while true; do
         printf "Choose database file's path: "
         read DATABASE_PATH
+        echo ${DATABASE_PATH%/*} #File/dir parent
+        echo ${DATABASE_PATH##*/} #File/dir name
+
+        
+        # Check if parent dir exists and is dir; fails otherwise
         if [[ ! -e ${DATABASE_PATH%/*} ]]; then
                 error "the directory given does not exists"
         elif [[ ! -d ${DATABASE_PATH%/*} ]]; then
@@ -152,6 +157,8 @@ while true; do
         else 
                 break
         fi
+
+        # Check if specified dir exists and is dir; if not exists ask for creation; fails otherwise
 done
 
 while true; do
