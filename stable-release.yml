@@ -4,7 +4,7 @@
 
 version: "3.9"
 services:
-    #
+    #   
     # MAIN SERVICES
     #
     
@@ -14,59 +14,62 @@ services:
         volumes:
             - database_data:/var/lib/postgresql/data 
         environment: 
-            POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+            POSTGRES_PASSWORD:  ${DATABASE_PASSWORD}
         secrets:
-            - configurations
+            - main_configurations
     
     # Cache module
     cache:
         image: redis
-        resources:
-            limits:
-                memory: 1G
+        #resources:
+        #    limits:
+        #        memory: 1G
 
-    # Visualization module
+    # Static site and API reverse proxy
     vizualization:
-        image: fdms3741/fasbus-visualization
+        image: fdms3741/fasbus-site
         ports:
-            - "${API_PORT}:80"
+            - "${API_PORT}:80" # Set the API interface public port, the default 80 may require root privileges
+
+    # API core
+    api:
+        image: fdms3741/fasbus-visualization
+        secrets:
+            - main_configurations
 
     # Insertion module
     insertion:
-        image: fdms3741/fasbus-rio-insertion
+        image: fdms3741/fasbus-rio-insertion       
         volumes: 
             - collected_data:/collect_bus_old
-
+         #environment:
+         #   DATABASE_USERNAME: 
+         #   DATABASE_PASSWORD: 
+         #   DATABASE_NAME:
+         #   DATABASE_HOST: 
         secrets:
-            - configurations
+            - main_configurations
                 
     # Correction module
     correction:
-        image: fdms3741/fasbus-corretion
-        
-
-    # #
-    # # Other utilities
-    # # 
-
-    # # Database administration platform
-    # adminer:
-    #     image: adminer
-    #     ports:
-    #         - '8088:8080'
-
-    # # Advanced data visualization platform
-    # grafana:
-    #     image: grafana/grafana
-    #     ports:
-    #         - '3000:3000'
+        build: ./Bus-trajectory-correction
 
 
 volumes:
     database_data:
+        driver: local
+        driver_opts: 
+            type: 'none'
+            o: 'bind'
+            device: ${DATABASE_PATH}
     collected_data:
+        driver: local
+        driver_opts: 
+            type: 'none'
+            o: 'bind'
+            device: ${RAW_DATA_PATH}
     
 
 secrets:
-    configurations:
+    main_configurations:
         file: main.conf

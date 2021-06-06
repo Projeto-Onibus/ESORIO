@@ -1,7 +1,6 @@
 #!/bin/bash
 echo "FAS-Bus: Fleet Analysis System for Urban Buses"
-echo "This script will guide you through the definition of variables required for the system to work."
-echo "Beggining setup"
+
 set -e
 
 # Colors for warnings and errors
@@ -41,7 +40,6 @@ case $1 in
 esac
 
 
-
 #
 # Functions for the display of colorful messages
 # 
@@ -76,15 +74,13 @@ printf "$GREEN[%s]$RESET%s$(no-skip $2)" "[SUCCESS]" ": $1"
 }
 
 
-success "success"
-error "error" " "
-info "info" "potato\n"
-exit
+info "This script will guide you through the definition of variables required for the system to work."
+info "Beggining setup"
+
 if [[ "$EUID" -ne 0 ]]; then
   critical "Container administration often requires root user privileges. Run this script as root so proper permissions may be set to files."
   exit
 fi
-
 
 while true; do 
         echo ""
@@ -96,7 +92,7 @@ while true; do
         read -s -n 32 FIRST_ATTEMPT    
         echo ""
         if [[ -z $FIRST_ATTEMPT ]]; then
-                warning "Are you sure you want a randomly generated password? (Y/n):"
+                printf "Are you sure you want a randomly generated password? (Y/n):"
                 read -n 1 CHOICE
                 echo ""
                 case $CHOICE in
@@ -146,6 +142,29 @@ while true; do
         API_PORT=""
 done
 
+while true; do
+        printf "Choose database file's path: "
+        read DATABASE_PATH
+        if [[ ! -e ${DATABASE_PATH%/*} ]]; then
+                error "the directory given does not exists"
+        elif [[ ! -d ${DATABASE_PATH%/*} ]]; then
+                error "the path given is not a directory"
+        else 
+                break
+        fi
+done
+
+while true; do
+        printf "Choose the raw collected data's path: "
+        read RAW_DATA_PATH
+        if [[ ! -e ${RAW_DATA_PATH%/*} ]]; then
+                error "the directory given does not exists"
+        elif [[ ! -d ${RAW_DATA_PATH%/*} ]]; then
+                error "the path given is not a directory"
+        else 
+                break
+        fi
+done
 
 info "Creating environment file"
 
@@ -155,13 +174,23 @@ if [[ -e .env ]]; then
         touch .env
 fi
 
+if [[ -e main.conf ]]; then
+        warning "main.conf exists. Setting new file and replacing old with backup"
+        mv main.conf "main.conf.$(date +%Y-%m-%d--%H-%M-%S).bkp"
+fi
+
+cp main.conf.template main.conf 
+
 # Altering database password
 echo "DATABASE_PASSWORD=$FIRST_ATTEMPT" >> .env
 echo "password=$FIRST_ATTEMPT" >> main.conf
 info "set the default port for API interaction."
 
-# Altering
+# Altering api port parameter
 echo "API_PORT=$API_PORT" >> .env
+echo "DATABASE_PATH=$DATABASE_PATH" >> .env
+echo "RAW_DATA_PATH=$RAW_DATA_PATH" >> .env
+
 
 #
 # Final steps
