@@ -42,7 +42,8 @@ services:
         image: fdms3741/fasbus-rio-insertion       
         volumes: 
             - collected_data:/collect_bus_old
-         #environment:
+        environment:
+            TZ: ${LOCAL_TIMEZONE}
          #   DATABASE_USERNAME: 
          #   DATABASE_PASSWORD: 
          #   DATABASE_NAME:

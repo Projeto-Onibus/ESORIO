@@ -186,6 +186,9 @@ if [[ -e main.conf ]]; then
         mv main.conf "main.conf.$(date +%Y-%m-%d--%H-%M-%S).bkp"
 fi
 
+LOCAL_TIMEZONE=$(cat /etc/timezone)
+warning "using local timezone ${LOCAL_TIMEZONE}. If this value is incorrect, change it in the .env file."
+
 cp main.conf.template main.conf 
 
 # Altering database password
@@ -197,7 +200,7 @@ info "set the default port for API interaction."
 echo "API_PORT=$API_PORT" >> .env
 echo "DATABASE_PATH=$DATABASE_PATH" >> .env
 echo "RAW_DATA_PATH=$RAW_DATA_PATH" >> .env
-
+echo "LOCAL_TIMEZONE=$LOCAL_TIMEZONE" >> .env
 
 #
 # Final steps
