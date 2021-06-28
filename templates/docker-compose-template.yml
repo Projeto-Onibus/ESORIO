@@ -4,19 +4,56 @@
 
 version: "3.9"
 services:
-    #   
-    # MAIN SERVICES
-    #
-    
+
+    # ---------------------------------------------------------
+    # FAS-Bus modules
+    # ---------------------------------------------------------
+
     # Database module
     dbcore:
-        image: fdms3741/fasbus-database
+        ~version~: ${DATABASE_MODULE_SOURCE}
         volumes:
             - database_data:/var/lib/postgresql/data 
         environment: 
             POSTGRES_PASSWORD:  ${DATABASE_PASSWORD}
         secrets:
             - main_configurations
+    
+    # Static site and API reverse proxy
+    vizualization:
+        ~version~: ${PROXY_MODULE_SOURCE}
+        ports:
+            - "${API_PORT}:80" # Set the API's exposed public port
+
+    # API core
+    api:
+        ~version~: ${API_MODULE_SOURCE}
+        secrets:
+            - main_configurations
+
+    # Insertion module
+    insertion:
+        ~version~: ${INSERTION_MODULE_SOURCE}       
+        volumes: 
+            - collected_data:/collect_bus_old
+        environment:
+            TZ: ${LOCAL_TIMEZONE}
+        secrets:
+            - main_configurations
+                
+    # Correction module
+    correction:
+        ~version~: ${CORRECTION_MODULE_SOURCE}
+        deploy:
+            resources:
+              reservations:
+                devices:
+                   - capabilities: [gpu]
+
+
+    #   
+    # Essencial services 
+    #
     
     # Cache module
     cache:
@@ -25,35 +62,7 @@ services:
         #    limits:
         #        memory: 1G
 
-    # Static site and API reverse proxy
-    vizualization:
-        image: fdms3741/fasbus-site
-        ports:
-            - "${API_PORT}:80" # Set the API interface public port, the default 80 may require root privileges
-
-    # API core
-    api:
-        image: fdms3741/fasbus-visualization
-        secrets:
-            - main_configurations
-
-    # Insertion module
-    insertion:
-        image: fdms3741/fasbus-rio-insertion       
-        volumes: 
-            - collected_data:/collect_bus_old
-        environment:
-            TZ: ${LOCAL_TIMEZONE}
-         #   DATABASE_USERNAME: 
-         #   DATABASE_PASSWORD: 
-         #   DATABASE_NAME:
-         #   DATABASE_HOST: 
-        secrets:
-            - main_configurations
-                
-    # Correction module
-    correction:
-        image: fdms3741/fasbus-correction
+#
 
 volumes:
     database_data:

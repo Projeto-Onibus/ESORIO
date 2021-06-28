@@ -1,3 +1,4 @@
 .env*
 .env
 main.conf
+docker-compose.yml
