@@ -4,4 +4,5 @@ main.conf
 docker-compose.yml
 FAS-Bus-*
 raw_data
+collected
 database
