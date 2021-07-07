@@ -59,40 +59,17 @@ help () {
 #       
 
 
-# TODO: Revisar lógica
-set_path () {
-        while true; do
-                printf "Choose path for $1 (default $(ls)/$2): "
-                read CHOOSEN_PATH
 
-                # If no input was given, it creates a default name given by function's second arg
-                if [[ -z ${CHOOSEN_PATH} ]]; then
-                        CHOOSEN_PATH=$(pwd)'/'$2
-                fi
-                # If no parent is given, defaults to cwd
-                if [[ -z ${CHOOSEN_PATH%/*} ]]; then
-                        CHOOSEN_PATH=$(pwd)'/'$CHOOSEN_PATH
-                fi
-                # If a path was given but no name, uses default
-                if [[ -z ${CHOOSEN_PATH##*/} ]]; then
-                        CHOOSEN_PATH=$CHOOSEN_PATH'/'$2
-                fi
-
-                # if parent doesn't exists, fails if true
-                if [[ ! -e ${CHOOSEN_PATH%/*} ]]; then 
-                        critical "Parent directory '${CHOOSEN_PATH%/*}' does not exist"
-                        exit 1
-                fi
-
-                # Verifies if name exists but isn't dir, fails if true
-                if [[ ! -d $CHOOSEN_PATH ]]; then
-                        critical "directory given is not "
-                fi
-
-
-
-        # Em sucesso
-        echo "${CHOOSEN_PATH}" > .FASBUS.$3
+ValidatePath () {
+        if [[ ! -d $1 ]]; then 
+                echo "Directory path does not exist"
+        fi
+        if [[ $(count $(ls $1)) > 0 ]]; then 
+                echo "Directory exists but it's not empty"
+        fi
+        # Valid path
+        echo 0
+                
 
 }
 
@@ -171,11 +148,7 @@ printf "$GREEN[%s]$RESET%s$(no-skip $2)" "[SUCCESS]" ": $1"
 info "This script will guide you through the definition of variables required for the system to work."
 info "Beggining setup"
 
-# Asks for root permissions to set proper file permissions (only visible to root)
-if [[ "$EUID" -ne 0 ]]; then
-  critical "Container administration often requires root user privileges. Run this script as root so proper permissions may be set to files."
-  exitmain.conf.template
-fi
+
 
 
 # ----------------------------------------------------------------
@@ -251,10 +224,18 @@ done
 # Setting paths
 # ------------------------------------------------------------------------
 
-RAW_DATA_PATH_VARNAME="RAW_DATA_PATH"
-set_path "raw collected data from rio's API" "raw_data_collected" "$RAW_DATA_PATH_VARNAME"
-DATABASE_PATH_VARNAME="DATABASE_PATH"
-set_path "database's data" "database" "$DATABASE_PATH_VARNAME"
+DATABASE_PATH=$(pwd)"/database"
+
+if [[ ! -d $DATABASE_PATH ]]; then
+        mkdir $DATABASE_PATH
+fi
+
+RAW_DATA_PATH=$(pwd)"/collected"
+
+if [[ ! -d $RAW_DATA_PATH ]]; then
+        mkdir $RAW_DATA_PATH
+fi
+
 
 # ------------------------------------------------------------------------
 
@@ -281,8 +262,8 @@ fi
 # Setting the system's timezone
 # ------------------------------------------------------------------------
 
-LOCAL_TIMEZONE=$(cat /etc/timezone)
-warning "using local timezone ${LOCAL_TIMEZONE}. If this value is incorrect, change it in the .env file."
+printf "Set local timezone: "
+read LOCAL_TIMEZONE
 
 # ------------------------------------------------------------------------
 
@@ -305,7 +286,7 @@ if [[ $1 == 'dev' ]]; then
                                 break
                         ;;
                         "n")
-                                error "Cannot proceed with installation without installing repositories"
+                                error "Cannot proceed with development installation without installing repositories"
                                 exit
                         ;;
                         *)
@@ -331,13 +312,13 @@ s;\${PROXY_MODULE_SOURCE};$PROXY_MODULE_SOURCE;g
 s;\${API_MODULE_SOURCE};$API_MODULE_SOURCE;g
 s;\${INSERTION_MODULE_SOURCE};$INSERTION_MODULE_SOURCE;g
 s;\${CORRECTION_MODULE_SOURCE};$CORRECTION_MODULE_SOURCE;g
-s;\${DATABASE_PATH};$(cat .FASBUS.$DATABASE_PATH_VARNAME);g
-s;\${RAW_DATA_PATH};$(cat .FASBUS.$RAW_DATA_PATH_VARNAME);g
+s;\${DATABASE_PATH};$DATABASE_PATH;g
+s;\${RAW_DATA_PATH};$RAW_DATA_PATH;g
 EOF
 
-sed -f .FASBUS.sed.sed templates/docker-compose-template.yml > docker-compose.yml 
+sed -f .FASBUS.sed.sed .templates/docker-compose-template.yml > docker-compose.yml 
 
-sed "s/###DB_PASSWORD###/password=${FIRST_ATTEMPT}/g" templates/main.conf.template > main.conf
+sed "s/###DB_PASSWORD###/password=${FIRST_ATTEMPT}/g" .templates/main.conf.template > main.conf
 
 
 # -------------------------------------------------------------------------
@@ -351,8 +332,6 @@ chmod 600 main.conf
 info "Files were set to read/write by root only. In those files the database password is saved. Keep those files secure."
 
 # Removing temporary files
-rm .FASBUS.$DATABASE_PATH_VARNAME
-rm .FASBUS.$RAW_DATA_PATH_VARNAME
 rm .FASBUS.sed.sed
 
 
