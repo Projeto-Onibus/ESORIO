@@ -59,7 +59,6 @@ help () {
 #       
 
 
-
 ValidatePath () {
         if [[ ! -d $1 ]]; then 
                 echo "Directory path does not exist"
@@ -148,6 +147,9 @@ printf "$GREEN[%s]$RESET%s$(no-skip $2)" "[SUCCESS]" ": $1"
 info "This script will guide you through the definition of variables required for the system to work."
 info "Beggining setup"
 
+if [[ $EUID != 0 ]]; then
+	warning "Not running as root, permissions may not be set accordinly"
+fi
 
 
 
@@ -279,10 +281,10 @@ if [[ $1 == 'dev' ]]; then
                 read DOWNLOAD_REPOS
                 case $DOWNLOAD_REPOS in
                         "Y")
-                                git clone https://github.com/Projeto-Onibus/FAS-Bus-visualization.git
-                                git clone https://github.com/Projeto-Onibus/FAS-Bus-insertion.git
-                                git clone https://github.com/Projeto-Onibus/FAS-Bus-Database.git
-                                git clone https://github.com/Projeto-Onibus/FAS-Bus-correction.git
+                                git clone git@github.com:Projeto-Onibus/FAS-Bus-visualization.git ||  git clone https://github.com/Projeto-Onibus/FAS-Bus-visualization.git
+                                git clone git@github.com:Projeto-Onibus/FAS-Bus-insertion.git ||  git clone https://github.com/Projeto-Onibus/FAS-Bus-insertion.git
+                                git clone git@github.com:Projeto-Onibus/FAS-Bus-Database.git ||  git clone https://github.com/Projeto-Onibus/FAS-Bus-Database.git
+                                git clone git@github.com:Projeto-Onibus/FAS-Bus-correction.git ||  git clone https://github.com/Projeto-Onibus/FAS-Bus-correction.git
                                 break
                         ;;
                         "n")

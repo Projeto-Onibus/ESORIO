@@ -44,6 +44,8 @@ services:
     # Correction module
     correction:
         ~version~: ${CORRECTION_MODULE_SOURCE}
+        secrets:
+           - main_configurations
         deploy:
             resources:
               reservations:
