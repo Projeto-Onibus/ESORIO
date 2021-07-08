@@ -30,6 +30,6 @@ limit=3
 user=postgres
 host=dbcore
 database=postgres
-# password=
-# DATABASE PASSWORD WILL BE WRITTEN AUTOMATICALY BY ./setup.sh
+###DB_PASSWORD###
+# DATABASE PASSWORD WILL BE WRITTEN AUTOMATICALY BY ./setup.sh, DO NOT DELETE LINE ABOVE
 # Once password is written, keep this file secure (so as the .env file)
