@@ -1,8 +1,10 @@
 .env*
 .env
 main.conf
-docker-compose.yml
+*.yml
 FAS-Bus-*
 raw_data
 collected
 database
+notes.txt
+*.ipynb
