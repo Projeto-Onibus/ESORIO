@@ -20,12 +20,6 @@
 # Stops at any error throughout the script
 set -e
 
-
-echo ""
-echo ""
-echo "FAS-Bus: Fleet Analysis System for Urban Buses"
-
-
 # Colors for warnings and errors
 RED="\e[31m"
 GREEN="\e[32m"
@@ -33,109 +27,149 @@ YELLOW="\e[33m"
 BLUE="\e[34m"
 RESET="\e[0m"
 
+# Default configurations value
+DEFAULT_PASSWORD=$(random_password)
+DEFAULT_API_PORT=80
+DEFAULT_DATABASE_PATH=$(pwd)"/database"
+DEFAULT_DATA_COLLECTED_PATH=$(pwd)"/collected"
+DEFAULT_LOCAL_TIMEZONE="America/Sao_Paulo"
+
+# Main title
+info echo ""
+info echo ""
+info echo $GREEN"FAS-Bus: Fleet Analysis System for Urban Buses"$RESET
+info echo ""
+info echo ""
+
 # help()
 # Description: displays a help message and then exits
 help () {
-        echo "usage:$0 {-h|dev|stable}"
+        echo "usage:$0 [options] {dev|latest|stable|quick}"
+	echo ""
         echo "This program aids the installation of the FAS-Bus in a single system environment"
-        echo "-h: displays this message"
-        echo "dev: installs the development version"
-        echo "stable: installs the stable version"
+	echo ""
+	echo "Options:"
+        printf "\t-h: displays this message\n"
+	printf "\t-v: displays info messages\n"
+	echo
+	echo "Instalation type:"
+        printf "\tdev: installs the development version, with local dir clonning necessary repositories\n"
+	printf "\tlatest: install the latest version, building directly from the git repositories\n"
+        printf "\tstable: installs the stable version, pulling images from the docker hub\n"
+	printf "\tquick: Same as stable, but set all variables to default values and executes script automaticaly"
+	echo ""
         echo "More instructions follow the program execution. No actions are taken before confirmation. "
         exit
 }
 
 
-# function: set_path $1 $2 $3
-# Description: 
-#       Helps user choose a path for a given purpose. 
-#       Checks to see if given name is valid and prints it to the .env file
-#       Selects a default path if not given by user
-#       Creates a file with the variable's name and writes its value to it
-# arguments:
-#       $1 -> name of the directory chosen for user display
-#       $2 -> Default name if user dont give
-#       $3 -> Path's name at .env file 
-#       
-
-
-ValidatePath () {
-        if [[ ! -d $1 ]]; then 
-                echo "Directory path does not exist"
-        fi
-        if [[ $(count $(ls $1)) > 0 ]]; then 
-                echo "Directory exists but it's not empty"
-        fi
-        # Valid path
-        echo 0
-                
-
+# Chooses between the help message or the development (or stable) release install. 
+DEFAULT_VALUES=""
+VERBOSE=""
+for $ARG in $@; do
+	case $ARG in
+		"-h")
+			help
+			;;
+		"-v")
+			VERBOSE="Yes"
+			;;
+			
+		"dev")
+			COMPOSE_FILE="build"
+			DATABASE_MODULE_SOURCE="./FAS-Bus-Database/"
+			PROXY_MODULE_SOURCE="./FAS-Bus-visualization/Site/"
+			API_MODULE_SOURCE="./FAS-Bus-visualization/API/"
+			INSERTION_MODULE_SOURCE="./FAS-Bus-insertion/"  
+			CORRECTION_MODULE_SOURCE="./FAS-Bus-correction/"
+			break
+			;;
+		"quick")
+			DEFAULT_VALUES="yes"
+		"latest")
+			COMPOSE_FILE="image"
+			DATABASE_MODULE_SOURCE="fdms-3741/fas-bus-database"
+			PROXY_MODULE_SOURCE="fdms-3741/fas-bus-site"
+			API_MODULE_SOURCE="fdms-3741/fas-bus-visualization"
+			INSERTION_MODULE_SOURCE="https://github.com/"  	
+		"stable")
+			COMPOSE_FILE="image"
+			DATABASE_MODULE_SOURCE="fdms-3741/fas-bus-database"
+			PROXY_MODULE_SOURCE="fdms-3741/fas-bus-site"
+			API_MODULE_SOURCE="fdms-3741/fas-bus-visualization"
+			INSERTION_MODULE_SOURCE="fdms-3741/fas-bus-insertion"  
+			CORRECTION_MODULE_SOURCE="fdms-3741/fas-bus-correction"
+			break
+			;;
+			
+		*)
+			critical echo "Could not unserstand option $ARG"
+			help
+			;;        
+	esac
+done
+# ---------------------------------------------------------------------
+# User interaction functions
+# ---------------------------------------------------------------------
+ask_proceed_instalation () {
+	
+	while true; do
+		printf "Are you sure you want to proceed? [Y/n]:"
+		read -n 2 CHOICE
+		case $CHOICE in
+			"Y")
+				break
+				;;
+			"n")
+				exit 0
+				;;
+			*)
+				error "Invalid input."
+		esac
+	done
 }
 
-
-
-# Chooses between the help message or the development (or stable) release install. 
-case $1 in
-        "-h")
-                help
-                ;;
-
-        "dev")
-                COMPOSE_FILE="build"
-                DATABASE_MODULE_SOURCE="./FAS-Bus-Database/"
-                PROXY_MODULE_SOURCE="./FAS-Bus-visualization/Site/"
-                API_MODULE_SOURCE="./FAS-Bus-visualization/API/"
-                INSERTION_MODULE_SOURCE="./FAS-Bus-insertion/"  
-                CORRECTION_MODULE_SOURCE="./FAS-Bus-correction/"
-                ;;
-
-        "stable")
-                
-                COMPOSE_FILE="image"
-                DATABASE_MODULE_SOURCE="fdms-3741/fas-bus-database"
-                PROXY_MODULE_SOURCE="fdms-3741/fas-bus-site"
-                API_MODULE_SOURCE="fdms-3741/fas-bus-visualization"
-                INSERTION_MODULE_SOURCE="fdms-3741/fas-bus-insertion"  
-                CORRECTION_MODULE_SOURCE="fdms-3741/fas-bus-correction"
-                ;;
-
-        *)
-                help
-                ;;        
-esac
-
+random_password (){
+	echo $(tr -dc A-Za-z0-9 </dev/urandom | head -c 31) 
+}
 
 # ------------------------------------------------------------------------------------------
 # Functions for the display of colorful messages
+#
+# Description: adds a tag for each displayed message
+# Usage: <function> <print-program and args>
+# Examples: 
+#	info printf "message"     	# Prints [INFO]: message; whitout skipping lines
+# 	error echo "an error occured"	# Prints [ERROR]: an error occured
 # ------------------------------------------------------------------------------------------
-no-skip () {
-        if [[ -z $1 ]];then
-                echo "\n"
-        else
-                echo $1
-        fi
-}
+
 critical () {
-        printf "$RED[%s]$RESET%s$(no-skip $2)" "[!!!CRITICAL!!!]" ": $1"
-        exit
+        printf "$RED[!!CRITICAL!!]$RESET :"
+	$@
 }
 
 error () {
-printf "$RED[%s]$RESET%s$(no-skip $2)" "[ERROR]" ": $1"
+	printf "$RED[ERROR]$RESET: "
+	$@
 }
 
 warning () {
-printf "$YELLOW[%s]$RESET%s$(no-skip $2)" "[WARNING]" ": $1"
+	printf "$YELLOW[WARNING]$RESET: "
+	$@
 }
-
 
 info () {
-printf "$YELLOW[%s]$RESET%s$(no-skip $2)" "[INFO]" ": $1"
+	if [[ $VERBOSE ]]; then
+		printf "$BLUE[INFO]$RESET: "
+		$@
+	fi
 }
 
-
 success () {
-printf "$GREEN[%s]$RESET%s$(no-skip $2)" "[SUCCESS]" ": $1"
+	if [[ $VERBOSE ]]; then
+		printf "$GREEN[SUCCESS]$RESET: " 
+		$@
+	fi
 }
 
 # ----------------------------------------------------------------------------------------------
@@ -144,24 +178,26 @@ printf "$GREEN[%s]$RESET%s$(no-skip $2)" "[SUCCESS]" ": $1"
 # Instalation script begin
 # ----------------------------------------------------------------------------------------------
 
-info "This script will guide you through the definition of variables required for the system to work."
-info "Beggining setup"
+info echo "This script will guide you through the definition of variables required for the system to work."
+info echo "Beggining setup"
 
 if [[ $EUID != 0 ]]; then
-	warning "Not running as root, permissions may not be set accordinly"
+	warning echo "Not running as root, permissions may not be set accordinly"
+	ask_proceed_instalation
 fi
-
-
 
 # ----------------------------------------------------------------
 # Sets database password
 # ----------------------------------------------------------------
+if [[ $DEFAULT_VALUES ]]; then
+	FIRST_ATTEMPT=$(random_password)
+else
 while true; do 
         echo ""
         echo ""
         echo "-------Set the database password------------"
-        warning "This password is nedded in all containers that communicate with the database. Handle this with care."
-        info "If you want to generate a secure random password, just leave this blank and say (Y)es to the generated password question"
+        warning echo "This password is nedded in all containers that communicate with the database. Handle this with care."
+        info echo "If you want to generate a secure random password, just leave this blank and say (Y)es to the generated password question"
         printf "Choose a password (max 32 chars):"
         read -s -n 32 FIRST_ATTEMPT    
         echo ""
@@ -171,11 +207,11 @@ while true; do
                 echo ""
                 case $CHOICE in
                         "Y")
-                                FIRST_ATTEMPT=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 31)
+                                FIRST_ATTEMPT=$(random_password)
                                 break
                                 ;;
                         *)
-                                error "Password not set"
+                                error echo "Password not set"
                                 continue
                 esac
         fi
@@ -186,10 +222,11 @@ while true; do
         if [[ $FIRST_ATTEMPT == $SECOND_ATTEMPT ]]; then
                 break
         fi
-        error "The passwords don't match"
+        error echo "The passwords don't match"
+	ask_proceed_instalation
 done
-
-success "Database password set"
+fi
+success echo "Database password set"
 # ------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------
@@ -197,42 +234,47 @@ success "Database password set"
 # ------------------------------------------------------------------------
 
 ONLY_DIGITS="^\\d+\$"
+
+if [[ $DEFAULT_VALUES ]]; then
+	API_PORT=$DEFAULT_API_PORT
+else
 while true; do
         printf "API port (default 80): "
         read -n 6 API_PORT
         if [[ -z $API_PORT ]]; then {
-                warning "Using default value 80"
+                warning echo "Using default value 80"
                 API_PORT=80
                 break
         }
         elif [[ ! $API_PORT =~ [0-9]* ]]; then
-                error "must be a number"
+                error echo "must be a number"
                 continue
         elif [[ $API_PORT < 1024 ]]; then
-                warning "Ports less than 1024 require root privileges when docker-compose command runs."
+                warning echo "Ports less than 1024 require root privileges when docker-compose command runs."
                 break
         elif [[ $API_PORT < 65365 ]];then
                 break
         else
-                error "Invalid port number"
+                error echo "Invalid port number"
                 continue
         fi
-        error "invalid port number"
+        error echo "invalid port number"
         API_PORT=""
 done
+fi
 # ------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------
-# Setting paths
+# Setting paths; TODO: Function to validade directories given by user 
 # ------------------------------------------------------------------------
 
-DATABASE_PATH=$(pwd)"/database"
+DATABASE_PATH=$DEFAULT_DATABASE_PATH
 
 if [[ ! -d $DATABASE_PATH ]]; then
         mkdir $DATABASE_PATH
 fi
 
-RAW_DATA_PATH=$(pwd)"/collected"
+RAW_DATA_PATH=$DEFAULT_COLLECTED_DATA_PATH
 
 if [[ ! -d $RAW_DATA_PATH ]]; then
         mkdir $RAW_DATA_PATH
@@ -245,17 +287,27 @@ fi
 # Creating necessary files 
 # ------------------------------------------------------------------------
 
-info "Creating environment file"
+info echo "Creating environment file"
 
 if [[ -e .env ]]; then
-        warning ".env file exists in this directory. setting a new file and changing current's name to .env.bkp"
-        mv .env ".env.$(date +%Y-%m-%d--%H-%M-%S).bkp"
+        error echo ".env file exists in this directory."
+	if [[ $DEFAULT_VALUES ]]; then 
+		exit 1
+	fi
+	warning echo "Proceeding with installation will append to current filename the current date and '.bkp'"
+	ask_proceed_instalation
+        mv .env ".env.$(date +%Y-%m-%d--%H-%M).bkp"
         touch .env
 fi
 
 if [[ -e main.conf ]]; then
-        warning "main.conf exists. Setting new file and replacing old with backup"
-        mv main.conf "main.conf.$(date +%Y-%m-%d--%H-%M-%S).bkp"
+        warning "main.conf exists in this directory."
+	if [[ $DEFAULT_VALUES ]]; then 
+		exit 1
+	fi
+	warning echo "Proceeding with installation will append to current filename the current date and '.bkp'"
+        ask_proceed_instalation
+	mv main.conf "main.conf.$(date +%Y-%m-%d--%H-%M).bkp"
 fi
 
 # ------------------------------------------------------------------------
@@ -264,9 +316,13 @@ fi
 # Setting the system's timezone
 # ------------------------------------------------------------------------
 
-printf "Set local timezone: "
-read LOCAL_TIMEZONE
-
+info echo "Setting local timezone"
+if [[ $DEFAULT_VALUES ]]; then
+	LOCAL_TIMEZONE=$DEFAULT_LOCAL_TIMEZONE
+else
+	printf "Set local timezone: "
+	read LOCAL_TIMEZONE
+fi
 # ------------------------------------------------------------------------
 
 
