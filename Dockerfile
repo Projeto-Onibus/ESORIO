@@ -6,7 +6,7 @@ RUN mkdir -p /app/templates
 
 WORKDIR /app
 
-COPY ./templates/ /app/templates/
+COPY ./.templates/ /app/.templates/
 
 COPY setup.sh  /app/
 

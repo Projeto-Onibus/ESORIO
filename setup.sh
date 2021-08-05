@@ -27,19 +27,10 @@ YELLOW="\e[33m"
 BLUE="\e[34m"
 RESET="\e[0m"
 
-# Default configurations value
-DEFAULT_PASSWORD=$(random_password)
-DEFAULT_API_PORT=80
-DEFAULT_DATABASE_PATH=$(pwd)"/database"
-DEFAULT_DATA_COLLECTED_PATH=$(pwd)"/collected"
-DEFAULT_LOCAL_TIMEZONE="America/Sao_Paulo"
 
-# Main title
-info echo ""
-info echo ""
-info echo $GREEN"FAS-Bus: Fleet Analysis System for Urban Buses"$RESET
-info echo ""
-info echo ""
+# ---------------------------------------------------------------------
+# User interaction functions
+# ---------------------------------------------------------------------
 
 # help()
 # Description: displays a help message and then exits
@@ -59,58 +50,9 @@ help () {
 	printf "\tquick: Same as stable, but set all variables to default values and executes script automaticaly"
 	echo ""
         echo "More instructions follow the program execution. No actions are taken before confirmation. "
-        exit
+	exit
 }
 
-
-# Chooses between the help message or the development (or stable) release install. 
-DEFAULT_VALUES=""
-VERBOSE=""
-for $ARG in $@; do
-	case $ARG in
-		"-h")
-			help
-			;;
-		"-v")
-			VERBOSE="Yes"
-			;;
-			
-		"dev")
-			COMPOSE_FILE="build"
-			DATABASE_MODULE_SOURCE="./FAS-Bus-Database/"
-			PROXY_MODULE_SOURCE="./FAS-Bus-visualization/Site/"
-			API_MODULE_SOURCE="./FAS-Bus-visualization/API/"
-			INSERTION_MODULE_SOURCE="./FAS-Bus-insertion/"  
-			CORRECTION_MODULE_SOURCE="./FAS-Bus-correction/"
-			break
-			;;
-		"quick")
-			DEFAULT_VALUES="yes"
-		"latest")
-			COMPOSE_FILE="image"
-			DATABASE_MODULE_SOURCE="fdms-3741/fas-bus-database"
-			PROXY_MODULE_SOURCE="fdms-3741/fas-bus-site"
-			API_MODULE_SOURCE="fdms-3741/fas-bus-visualization"
-			INSERTION_MODULE_SOURCE="https://github.com/"  	
-		"stable")
-			COMPOSE_FILE="image"
-			DATABASE_MODULE_SOURCE="fdms-3741/fas-bus-database"
-			PROXY_MODULE_SOURCE="fdms-3741/fas-bus-site"
-			API_MODULE_SOURCE="fdms-3741/fas-bus-visualization"
-			INSERTION_MODULE_SOURCE="fdms-3741/fas-bus-insertion"  
-			CORRECTION_MODULE_SOURCE="fdms-3741/fas-bus-correction"
-			break
-			;;
-			
-		*)
-			critical echo "Could not unserstand option $ARG"
-			help
-			;;        
-	esac
-done
-# ---------------------------------------------------------------------
-# User interaction functions
-# ---------------------------------------------------------------------
 ask_proceed_instalation () {
 	
 	while true; do
@@ -177,6 +119,66 @@ success () {
 # ----------------------------------------------------------------------------------------------
 # Instalation script begin
 # ----------------------------------------------------------------------------------------------
+
+# Default configurations value
+DEFAULT_PASSWORD=$(random_password)
+DEFAULT_API_PORT=80
+DEFAULT_DATABASE_PATH=$(pwd)"/database"
+DEFAULT_DATA_COLLECTED_PATH=$(pwd)"/collected"
+DEFAULT_LOCAL_TIMEZONE="America/Sao_Paulo"
+
+# Main title
+info echo ""
+info echo ""
+info echo $GREEN"FAS-Bus: Fleet Analysis System for Urban Buses"$RESET
+info echo ""
+info echo ""
+
+# Chooses between the help message or the development (or stable) release install. 
+DEFAULT_VALUES=""
+VERBOSE=""
+for $ARG in $@; do
+	case $ARG in
+		"-h")
+			help
+			;;
+		"-v")
+			VERBOSE="Yes"
+			;;
+			
+		"dev")
+			COMPOSE_FILE="build"
+			DATABASE_MODULE_SOURCE="./FAS-Bus-Database/"
+			PROXY_MODULE_SOURCE="./FAS-Bus-visualization/Site/"
+			API_MODULE_SOURCE="./FAS-Bus-visualization/API/"
+			INSERTION_MODULE_SOURCE="./FAS-Bus-insertion/"  
+			CORRECTION_MODULE_SOURCE="./FAS-Bus-correction/"
+			break
+			;;
+		"quick")
+			DEFAULT_VALUES="yes"
+		"latest")
+			COMPOSE_FILE="image"
+			DATABASE_MODULE_SOURCE="fdms-3741/fas-bus-database"
+			PROXY_MODULE_SOURCE="fdms-3741/fas-bus-site"
+			API_MODULE_SOURCE="fdms-3741/fas-bus-visualization"
+			INSERTION_MODULE_SOURCE="https://github.com/"  	
+		"stable")
+			COMPOSE_FILE="image"
+			DATABASE_MODULE_SOURCE="fdms-3741/fas-bus-database"
+			PROXY_MODULE_SOURCE="fdms-3741/fas-bus-site"
+			API_MODULE_SOURCE="fdms-3741/fas-bus-visualization"
+			INSERTION_MODULE_SOURCE="fdms-3741/fas-bus-insertion"  
+			CORRECTION_MODULE_SOURCE="fdms-3741/fas-bus-correction"
+			break
+			;;
+			
+		*)
+			critical echo "Could not unserstand option $ARG"
+			help
+			;;        
+	esac
+done
 
 info echo "This script will guide you through the definition of variables required for the system to work."
 info echo "Beggining setup"
