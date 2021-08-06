@@ -2,14 +2,10 @@ FROM debian:latest
 
 RUN apt update && apt install -y vim git
 
-RUN mkdir -p /app/templates
+RUN mkdir -p /app /tests
 
-WORKDIR /app
+VOLUME ["/app"]
 
-COPY ./.templates/ /app/.templates/
+WORKDIR /tests
 
-COPY setup.sh  /app/
-
-RUN chmod +x setup.sh
-
-CMD ["/bin/bash"]
+CMD  /bin/bash
