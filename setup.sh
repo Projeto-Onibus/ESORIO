@@ -148,10 +148,10 @@ DEFAULT_DATABASE_PATH=$(pwd)"/database"
 DEFAULT_COLLECTED_DATA_PATH=$(pwd)"/collected"
 DEFAULT_LOCAL_TIMEZONE="America/Sao_Paulo"
 
-GIT_DATABASE_MODULE_SOURCE="https://github.com/Projeto-Onibus/FAS-Bus-Database"
-GIT_VISUALIZATION_MODULE_SOURCE="https://github.com/Projeto-Onibus/FAS-Bus-visualization"
-GIT_INSERTION_MODULE_SOURCE="https://github.com/Projeto-Onibus/FAS-Bus-insertion"
-GIT_CORRECTION_MODULE_SOURCE="https://github.com/Projeto-Onibus/FAS-Bus-correction"
+GIT_DATABASE_MODULE_SOURCE="https://github.com/Projeto-Onibus/FAS-Bus-Database.git"
+GIT_VISUALIZATION_MODULE_SOURCE="https://github.com/Projeto-Onibus/FAS-Bus-visualization.git"
+GIT_INSERTION_MODULE_SOURCE="https://github.com/Projeto-Onibus/FAS-Bus-insertion.git"
+GIT_CORRECTION_MODULE_SOURCE="https://github.com/Projeto-Onibus/FAS-Bus-correction.git"
 
 # Chooses between the help message or the development (or stable) release install. 
 DEFAULT_VALUES=""
