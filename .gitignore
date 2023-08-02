@@ -2,7 +2,6 @@
 .env
 main.conf
 *.yml
-FAS-Bus-*
 raw_data
 collected
 database
