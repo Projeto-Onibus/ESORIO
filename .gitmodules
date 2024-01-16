@@ -10,3 +10,6 @@
 [submodule "FAS-Bus-insertion"]
 	path = FAS-Bus-insertion
 	url = git@github.com:Projeto-Onibus/FAS-Bus-insertion.git
+[submodule "FAS-Buses"]
+	path = FAS-Buses
+	url = git@github.com:Projeto-Onibus/FAS-Buses.git
