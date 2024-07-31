@@ -4,3 +4,6 @@
 [submodule "FAS-Bus-correction"]
 	path = FAS-Bus-correction
 	url = git@github.com:Projeto-Onibus/FAS-Bus-correction.git
+[submodule "FAS-Buses"]
+	path = FAS-Buses
+	url = git@github.com:Projeto-Onibus/FAS-Buses.git
