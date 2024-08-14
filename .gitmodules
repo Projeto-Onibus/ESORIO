@@ -2,7 +2,7 @@
 	path = FAS-Bus-visualization
 	url = git@github.com:Projeto-Onibus/FAS-Bus-visualization.git
 [submodule "FAS-Bus-Database"]
-	path = FAS-Bus-Database
+	path = FAS-Databases
 	url = git@github.com:Projeto-Onibus/FAS-Bus-Database.git
 [submodule "FAS-Bus-correction"]
 	path = FAS-Bus-correction
