@@ -1,9 +1,9 @@
 .env*
 .env
 main.conf
-*.yml
 raw_data
 collected
 database
 notes.txt
 *.ipynb
+db_password
