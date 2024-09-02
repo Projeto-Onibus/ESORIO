@@ -1,18 +1,34 @@
 services:
-  
-  database:
-    build:
-      context: ./FAS-Databases
-    environment:
-      - POSTGRES_PASSWORD="database"
-    ports:
-      - 15432:5432
-    volumes:
-      - db_data:/var/lib/postgresql/data
-
-  buses: 
+  bus:
     build:
       context: ./FAS-Buses
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_PASSWORD=buses
+      - POSTGRES_USER=buses
+      - POSTGRES_DB=buses
+    volumes:
+      - "./FAS-Buses/app/:/app/"
+
+  gw:
+    build:
+      context: ./FAS-Gateway
+    ports:
+      - '8080:5000'
+    volumes:
+      - "./FAS-Gateway/app/:/app/"
+
+
+  db:
+    build:
+      context: ./FAS-Bus-Database/
+    environment:
+      - POSTGRES_PASSWORD=12345
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./FAS-Bus-Database/data:/var/data/init_data/
+    ports:
+      - '15432:5432'
 
   broker:
     image: rabbitmq:3
@@ -22,13 +38,19 @@ services:
 
   logger:
     image: grafana/loki:2.9.0
+    ports:
+      - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
   
-  interface:
+  grafana:
     environment:
       - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
       - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Data
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    
+    volumes:
+      - grafana_data:/var/lib/grafana
+
     entrypoint:
       - sh
       - -euc
@@ -50,7 +72,8 @@ services:
         /run.sh
     image: grafana/grafana:latest
     ports:
-      - "3000:3000"
+      - "3000:3000" 
+
 
 volumes:
   db_data:
