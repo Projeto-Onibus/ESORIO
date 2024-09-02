@@ -13,3 +13,9 @@
 [submodule "FAS-Buses"]
 	path = FAS-Buses
 	url = git@github.com:Projeto-Onibus/FAS-Buses.git
+[submodule "FAS-Bus-Database"]
+	path = FAS-Bus-Database
+	url = https://github.com/Projeto-Onibus/FAS-Bus-Database.git
+[submodule "FAS-Gateway"]
+	path = FAS-Gateway
+	url = git@github.com:Projeto-Onibus/FAS-Gateway.git
