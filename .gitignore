@@ -7,3 +7,4 @@ database
 notes.txt
 *.ipynb
 db_password
+docs/build/
